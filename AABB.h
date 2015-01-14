@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <vector>
 #include <algorithm>
+#include <float.h>
 #include "Mesh.h"
 #include "Geom.h"
 #include "string.h"
@@ -19,72 +20,53 @@ public:
 		update();
 	}
 	~AABB(void);
-	int closestFace(float *v, float *coeff)
+	int closestFace(float *v, float *coeff, float range = 0)
 	{
 		float err = 0; // numerical error
 		bool success = false;
-		int index = -1;
+		int index = 0;
 
+		float vmin[3] = {v[0] - range, v[1] - range, v[2] - range};
+		float vmax[3] = {v[0] + range, v[1] + range, v[2] + range};
 		vector<int> cand;
 		float eps = 0;
 		for (int trial = 0; cand.empty(); trial++)
 		{
-			searchTree(v, m_tree, &cand, eps);
+			searchTree(vmin, vmax, m_tree, &cand, eps);
 			if (trial == 0) eps = 1e-7;
 			else eps *= 10;
 		}
 		sort(cand.begin(), cand.end());
 		cand.erase(unique(cand.begin(), cand.end()), cand.end());
-		/*for (int i = 0; i < cand.size(); i++)
-			cout << cand[i] << " ";
-		cout << endl;*/
-
-		float *dist = new float[cand.size()];
-		bool *contain = new bool[cand.size()];
-		memset(contain, 0, sizeof(bool) * cand.size());
 
 		for (int trial = 0; !success; trial++)
 		{
+			float min_dist = FLT_MAX;
 			for (int i = 0; i < cand.size(); i++)
 			{
-				Face f = *m_mesh->face(cand[i]);
-				Vertex a = *f.vertex(0);
-				Vertex b = *f.vertex(1);
-				Vertex c = *f.vertex(2);
+				const float *a = m_mesh->face(cand[i])->vertex(0)->fv();
+				const float *b = m_mesh->face(cand[i])->vertex(1)->fv();
+				const float *c = m_mesh->face(cand[i])->vertex(2)->fv();
 
-				// bary centric
-				Coordinate::cart2bary((float *)a.fv(), (float *)b.fv(), (float *)c.fv(), v, coeff);
+				// closest distance
+				float dist = Coordinate::dpoint2tri(a, b, c, v);
 
-				if (coeff[0] >= err && coeff[1] >= err && coeff[2] >= err)
+				if (dist < min_dist)
 				{
-					//printf("%d - (%.10f %.10f %.10f)\n", cand[j] + 1, coeff[0], coeff[1], coeff[2]);
-					success = true;
-					dist[i] = fabs(Coordinate::dpoint2tri(a.fv(), b.fv(), c.fv(), v));
-					contain[i] = true;
+					index = cand[i];
+					min_dist = dist;
 				}
 			}
-			if (trial == 0) err = -1e-16;
-			else err *= 10;
+			success = true;
 		}
-		float min_dist = 1;
-		for (int i = 0; i < cand.size(); i++)
-		{
-			if (contain[i] && min_dist > dist[i])
-			{
-				index = cand[i];
-				min_dist = dist[i];
-			}
-		}
+
 		Face f = *m_mesh->face(index);
-		Vertex a = *f.vertex(0);
-		Vertex b = *f.vertex(1);
-		Vertex c = *f.vertex(2);
+		const Vertex &a = *f.vertex(0);
+		const Vertex &b = *f.vertex(1);
+		const Vertex &c = *f.vertex(2);
 
 		// bary centric
 		Coordinate::cart2bary((float *)a.fv(), (float *)b.fv(), (float *)c.fv(), v, coeff);
-
-		delete [] dist;
-		delete [] contain;
 
 		return index;
 	}
@@ -117,20 +99,44 @@ private:
 
 		m_tree = construction(range, cand);
 	};
-	void searchTree(float *p, node *root, vector<int> *cand, float eps = 0)
+	void searchTree(float *pmin, float *pmax, node *root, vector<int> *cand, float eps = 0, bool trace = false)
 	{
-		if (root->left != NULL && 
-			p[0] >= root->left->x0 - eps && p[1] >= root->left->y0 - eps && p[2] >= root->left->z0 - eps && 
-			p[0] <= root->left->x1 + eps && p[1] <= root->left->y1 + eps && p[2] <= root->left->z1 + eps)
-			searchTree(p, root->left, cand, eps);
-		if (root->right != NULL &&
-			p[0] >= root->right->x0 - eps && p[1] >= root->right->y0 - eps && p[2] >= root->right->z0 - eps && 
-			p[0] <= root->right->x1 + eps && p[1] <= root->right->y1 + eps && p[2] <= root->right->z1 + eps)
-			searchTree(p, root->right, cand, eps);
+		bool traceOverL = false, traceOverR = false;
 
-		if (root->left == NULL && root->right == NULL)
-			for (int i = 0; i < root->cand.size(); i++)
-				cand->push_back(root->cand[i]);
+		if (!trace)
+		{
+			if (root->left != NULL && 
+				pmin[0] >= root->left->x0 - eps && pmin[1] >= root->left->y0 - eps && pmin[2] >= root->left->z0 - eps && 
+				pmin[0] <= root->left->x1 + eps && pmin[1] <= root->left->y1 + eps && pmin[2] <= root->left->z1 + eps &&
+				pmax[0] >= root->left->x0 - eps && pmax[1] >= root->left->y0 - eps && pmax[2] >= root->left->z0 - eps && 
+				pmax[0] <= root->left->x1 + eps && pmax[1] <= root->left->y1 + eps && pmax[2] <= root->left->z1 + eps)
+				searchTree(pmin, pmax, root->left, cand, eps, trace);
+			else
+				traceOverL = true;
+
+			if (root->right != NULL && 
+				pmin[0] >= root->right->x0 - eps && pmin[1] >= root->right->y0 - eps && pmin[2] >= root->right->z0 - eps && 
+				pmin[0] <= root->right->x1 + eps && pmin[1] <= root->right->y1 + eps && pmin[2] <= root->right->z1 + eps &&
+				pmax[0] >= root->right->x0 - eps && pmax[1] >= root->right->y0 - eps && pmax[2] >= root->right->z0 - eps && 
+				pmax[0] <= root->right->x1 + eps && pmax[1] <= root->right->y1 + eps && pmax[2] <= root->right->z1 + eps)
+				searchTree(pmin, pmax, root->right, cand, eps, trace);
+			else
+				traceOverR = true;
+		}
+
+		if ((traceOverL && traceOverR) || trace)
+		{
+			if (root->left == NULL && root->right == NULL)
+			{
+				for (int i = 0; i < root->cand.size(); i++)
+					cand->push_back(root->cand[i]);
+			}
+			else
+			{
+				if (root->left == NULL) searchTree(pmin, pmax, root->right, cand, eps, true);
+				if (root->right == NULL) searchTree(pmin, pmax, root->left, cand, eps, true);
+			}
+		}
 	};
 	node *construction(vector<float *> range, vector<int> cand)
 	{
@@ -192,12 +198,19 @@ private:
 			}
 		}
 
-		if (left.size() == cand.size() || right.size() == cand.size()) return NULL;
-
 		// new node
 		node *elem;
-		node *lnode = construction(lrange, left);
-		node *rnode = construction(rrange, right);
+		node *lnode, *rnode;
+		if (left.size() == cand.size() || right.size() == cand.size())
+		{
+			lnode = NULL;
+			rnode = NULL;
+		}
+		else
+		{
+			lnode = construction(lrange, left);
+			rnode = construction(rrange, right);
+		}
 		if (lnode != NULL && rnode == NULL) elem = lnode;
 		else if (lnode == NULL && rnode != NULL) elem = rnode;
 		else
@@ -207,21 +220,15 @@ private:
 			elem->right = rnode;
 			if (lnode == NULL && rnode == NULL) elem->cand = cand;
 		}
-		/*node *elem = new node();
-		node *lnode = construction(lrange, left, dim + 1);
-		node *rnode = construction(rrange, right, dim + 1);
-		elem->cand = cand;
-		elem->left = lnode;
-		elem->right = rnode;*/
 
 		return elem;
 	};
 	void boundingBox(Face f, float *r)
 	{
 		float minx, maxx, miny, maxy, minz, maxz;
-		minx = 1, maxx = -1;
-		miny = 1, maxy = -1;
-		minz = 1, maxz = -1;
+		minx = FLT_MAX, maxx = -FLT_MAX;
+		miny = FLT_MAX, maxy = -FLT_MAX;
+		minz = FLT_MAX, maxz = -FLT_MAX;
 		for (int j = 0; j < 3; j++)
 		{
 			Vertex v = *f.vertex(j);

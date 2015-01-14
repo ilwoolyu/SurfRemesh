@@ -201,7 +201,7 @@ void SurfaceRemeshing::deformSurface()
 	{
 		float coeff[3];
 		Vertex *v = (Vertex *)m_sphere->vertex(i);
-		int id = m_tree->closestFace((float *)v->fv(), coeff);
+		int id = m_tree->closestFace((float *)v->fv(), coeff, 0.0001);
 		float d_v[3];
 		if (m_interpolation)
 		{
@@ -229,7 +229,7 @@ void SurfaceRemeshing::deformData()
 		{
 			float coeff[3];
 			Vertex *v = (Vertex *)m_sphere->vertex(i);
-			int id = m_tree->closestFace((float *)v->fv(), coeff);
+			int id = m_tree->closestFace((float *)v->fv(), coeff, 0.0001);
 			float d;
 			if (m_interpolation)
 			{
