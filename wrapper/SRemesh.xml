@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+<title>Surface Remeshing Tool</title>
+<version>1.0</version>
+<contributor>Ilwoo Lyu</contributor>
+<description>xml for Surface Remeshing Tool</description>
+	<parameters>
+		<string>
+			<longflag>tempModel</longflag>
+			<flag>t</flag>
+			<name>temp</name>
+			<description>Template model (unit sphere) used for the spherical parameterization</description>
+		</string>
+		<string>
+			<longflag>input</longflag>
+			<flag>i</flag>
+			<name>input</name>
+			<description>Path to directory with subject surface model files</description>
+		</string>
+		<string>
+			<longflag>coeff</longflag>
+			<flag>c</flag>
+			<name>coeff</name>
+			<description>Path to list of spherical harmonic coefficients</description>
+		</string>
+		<string>
+			<longflag>output</longflag>
+			<flag>o</flag>
+			<name>output</name>
+		</string>
+		<string>
+			<longflag>ref</longflag>
+			<flag>r</flag>
+			<name>ref</name>
+			<description>Reference model (unit sphere) for the final surface remeshing</description>
+		</string>
+		<string-vector>
+			<longflag>property</longflag>
+			<flag>p</flag>
+			<name>property</name>
+			<description>List of properties that are included in the resulting mesh file</description>
+		</string-vector>
+  	</parameters>
+</executable>
