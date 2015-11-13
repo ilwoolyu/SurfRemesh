@@ -13,13 +13,14 @@ class SurfaceRemeshing
 public:
 	SurfaceRemeshing(void);
 	~SurfaceRemeshing(void);
-	SurfaceRemeshing(char *subject, char *sphere, char *dfield, char *sphere_t = NULL, vector<string> property = vector<string>(), bool interpolation = true, bool backward = false);
-	void saveDeformedSurface(char *filename);
-	void saveSurface(char *filename);
+	SurfaceRemeshing(const char *subject, const char *sphere, const char *dfield, bool keepColor, const char *sphere_t = NULL, const char *colormap = NULL, vector<string> property = vector<string>(), bool interpolation = true, bool backward = false);
+	void saveDeformedSurface(const char *filename);
+	void saveDeformedSphere(const char *filename);
 
 private:
 	void reconsCoord(const float *v0, float *v1, float *Y, float *coeff, float degree, float *pole);
 	float dataInterpolation(float *refMap, int index, float *coeff, Mesh *mesh);
+	int dataInterpolation(vector<int *> refMap, int index, float *coeff, Mesh *mesh, int channel);
 	float dataMedian(float *refMap, int index, Mesh *mesh);
 	void deformSurface(void);
 	void deformData(void);
@@ -32,10 +33,13 @@ private:
 	AABB *m_tree;
 	bool m_interpolation;
 	bool m_backward;
+	bool m_keepColor;
 	Mesh *m_sphere, *m_sphere_subj, *m_subj, *m_remesh;
 	vector<float *> m_refMap;
 	vector<float *> m_deData;
 	vector<string> m_property;
+	vector<int *> m_color;
+	vector<int *> m_color_base;
 };
 
 

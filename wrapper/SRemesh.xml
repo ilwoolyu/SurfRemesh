@@ -5,6 +5,11 @@
 <contributor>Ilwoo Lyu</contributor>
 <description>xml for Surface Remeshing Tool</description>
 	<parameters>
+		<boolean>
+			<longflag>keepColor</longflag>
+			<name>keepC</name>
+			<description>Keep color of the template model</description>
+		</boolean>
 		<string>
 			<longflag>tempModel</longflag>
 			<flag>t</flag>
@@ -33,6 +38,16 @@
 			<flag>r</flag>
 			<name>ref</name>
 			<description>Reference model (unit sphere) for the final surface remeshing</description>
+		</string>
+		<string>
+			<longflag>deform</longflag>
+			<name>deform</name>
+			<description>Deformed sphere by the given deformation field</description>
+		</string>
+		<string>
+			<longflag>color</longflag>
+			<name>color</name>
+			<description>Color map of the reference model that will assign the same color to the generated surface</description>
 		</string>
 		<string-vector>
 			<longflag>property</longflag>
