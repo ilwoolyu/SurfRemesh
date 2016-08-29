@@ -25,7 +25,6 @@ int main(int argc, char* argv[])
 	if (!deform.empty()) dsphere = (char *) deform.c_str();
 	char *colormap = NULL;
 	if (!color.empty()) colormap = (char *) color.c_str();
-	
 	SurfaceRemeshing *SR;
 
 /*	int id = 963368;
@@ -44,6 +43,7 @@ int main(int argc, char* argv[])
 	cout << "Write output surface model..\n";
 	SR->saveDeformedSurface(result);
 	if (dsphere != NULL) SR->saveDeformedSphere(dsphere);
+	if (outputProp) SR->saveDeformedProperty(result);
 
 	delete SR;
 	

@@ -404,6 +404,29 @@ void SurfaceRemeshing::saveDeformedSurface(const char *filename)
 	}
 }
 
+void SurfaceRemeshing::saveDeformedProperty(const char *filename)
+{
+	if (m_property != vector<string>())
+	{
+		for (int i = 0; i < m_refMap.size(); i++)
+		{
+			string name = m_property[i].substr(0, m_property[i].size() - 4);
+			unsigned found = name.find_last_of(".") + 1;
+			name = name.substr(found, name.size() - found);
+			char fullname[1024];
+			sprintf(fullname, "%s_%s.txt", filename, name.c_str());
+			
+			FILE *fp = fopen(fullname, "w");
+			fprintf(fp, "NUMBER_OF_POINTS %d\n", m_sphere->nVertex());
+			fprintf(fp, "DIMENSION=1\n");
+			fprintf(fp, "TYPE=Scalar\n");
+			for (int j = 0; j < m_sphere->nVertex(); j++)
+				fprintf(fp, "%f\n", m_refMap[i][j]);
+			fclose(fp);
+		}
+	}
+}
+
 void SurfaceRemeshing::saveDeformedSphere(const char *filename)
 {
 	m_sphere_subj->saveFile(filename, "vtk");

@@ -33,6 +33,12 @@
 			<flag>o</flag>
 			<name>output</name>
 		</string>
+		<boolean>
+			<longflag>outputProperty</longflag>
+			<name>outputProp</name>
+			<default></default>
+			<description>Output of properties after remeshing</description>
+		</boolean>
 		<string>
 			<longflag>ref</longflag>
 			<flag>r</flag>
