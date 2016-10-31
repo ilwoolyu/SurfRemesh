@@ -20,25 +20,25 @@
 			<longflag>input</longflag>
 			<flag>i</flag>
 			<name>input</name>
-			<description>Path to directory with subject surface model files</description>
+			<description>Subject surface model</description>
 		</string>
 		<string>
 			<longflag>coeff</longflag>
 			<flag>c</flag>
 			<name>coeff</name>
-			<description>Path to list of spherical harmonic coefficients</description>
+			<description>Spherical harmonic coefficients</description>
 		</string>
 		<string>
 			<longflag>output</longflag>
 			<flag>o</flag>
 			<name>output</name>
 		</string>
-		<boolean>
+		<string>
 			<longflag>outputProperty</longflag>
 			<name>outputProp</name>
 			<default></default>
 			<description>Output of properties after remeshing</description>
-		</boolean>
+		</string>
 		<string>
 			<longflag>ref</longflag>
 			<flag>r</flag>
@@ -55,11 +55,17 @@
 			<name>color</name>
 			<description>Color map of the reference model that will assign the same color to the generated surface</description>
 		</string>
+		<boolean>
+			<longflag>noheader</longflag>
+			<name>noheader</name>
+			<description>disables header in the generated property map</description>
+			<default>0</default>
+		</boolean>
 		<string-vector>
 			<longflag>property</longflag>
 			<flag>p</flag>
 			<name>property</name>
-			<description>List of properties that are included in the resulting mesh file</description>
+			<description>Properties that are included in the resulting mesh file</description>
 		</string-vector>
   	</parameters>
 </executable>

@@ -1,5 +1,4 @@
 #include <string>
-#include <dirent.h>
 
 #include "SRemeshCLP.h"
 #include "SurfaceRemeshing.h"
@@ -17,7 +16,6 @@ int main(int argc, char* argv[])
 	char *subject = (char *) input.c_str();
 	char *dfield = NULL;
 	if (!coeff.empty()) dfield = (char *) coeff.c_str();
-	char *result = (char *) output.c_str();
 	char *sphere = (char *) temp.c_str();
 	char *reference = NULL;
 	if (!ref.empty()) reference = (char *) ref.c_str();
@@ -35,15 +33,15 @@ int main(int argc, char* argv[])
 
 	cout << "subject: " << subject << endl;
 	cout << "sphere: " << sphere << endl;
-	cout << "deformation: " << dfield << endl;
+	if (!coeff.empty())  cout << "deformation: " << dfield << endl;
 	cout << "reference: " << reference << endl;
 	
 	SR = new SurfaceRemeshing(subject, sphere, dfield, keepC, reference, colormap, property);
 
 	cout << "Write output surface model..\n";
-	SR->saveDeformedSurface(result);
+	if (!output.empty()) SR->saveDeformedSurface(output.c_str());
 	if (dsphere != NULL) SR->saveDeformedSphere(dsphere);
-	if (outputProp) SR->saveDeformedProperty(result);
+	if (!outputProp.empty()) SR->saveDeformedProperty(outputProp.c_str(), !noheader);
 
 	delete SR;
 	

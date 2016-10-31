@@ -20,12 +20,12 @@ SurfaceRemeshing::SurfaceRemeshing(const char *subject, const char *sphere, cons
 	m_subj = new Mesh();
 	m_subj->openFile(subject);
 	
-	int n = m_subj->nVertex();
-	m_x = new float[n];
-	m_y = new float[n];
-	m_z = new float[n];
+	int nv = m_subj->nVertex();
+	m_x = new float[nv];
+	m_y = new float[nv];
+	m_z = new float[nv];
 
-	for (int i = 0; i < n; i++)
+	for (int i = 0; i < nv; i++)
 	{
 		Vertex *v = (Vertex *)m_subj->vertex(i);
 		const float *fv = v->fv();
@@ -39,11 +39,28 @@ SurfaceRemeshing::SurfaceRemeshing(const char *subject, const char *sphere, cons
 	m_sphere_subj = new Mesh();
 	m_sphere_subj->openFile(sphere);
 	m_sphere_subj->centering();
+	
+	for (int i = 0; i < nv; i++)
+	{
+		Vertex *v = (Vertex *)m_sphere_subj->vertex(i);
+		const float *fv = v->fv();
+		Vector V(v->fv());
+		V.unit();
+		v->setVertex(V.fv());
+	}
 
 	if (sphere_t == NULL) sphere_t = sphere;
 	m_sphere = new Mesh();
 	m_sphere->openFile(sphere_t);
 	m_sphere->centering();
+	for (int i = 0; i < m_sphere->nVertex(); i++)
+	{
+		Vertex *v = (Vertex *)m_sphere->vertex(i);
+		const float *fv = v->fv();
+		Vector V(v->fv());
+		V.unit();
+		v->setVertex(V.fv());
+	}
 	
 	m_remesh = new Mesh();
 	m_remesh->openFile(sphere_t);
@@ -64,53 +81,67 @@ SurfaceRemeshing::SurfaceRemeshing(const char *subject, const char *sphere, cons
 		fp = fopen(dfield, "r");
 		fscanf(fp, "%f %f %f", &m_pole[0], &m_pole[1], &m_pole[2]);
 		fscanf(fp, "%d", &m_degree);
-		int n = (m_degree + 1) * (m_degree + 1);
-		m_coeff = new float[n * 2];
+	}
+	else
+	{
+		m_pole[0] = 0;
+		m_pole[1] = 0;
+		m_pole[2] = 1;
+		m_degree = 0;
+	}
+	int n = (m_degree + 1) * (m_degree + 1);
+	m_coeff = new float[n * 2];
+	if (dfield != NULL)
+	{
 		for (int i = 0; i < n; i++)
 			fscanf(fp, "%f %f", &m_coeff[i], &m_coeff[n + i]);
 		fclose(fp);
-		
-		float phi, theta;
-		Coordinate::cart2sph(m_pole, &phi, &theta);
-
-		cout << "Initializing deformation..\n";
-		// deform vertex
-		float eps = 0.0f;
-		float *Y = new float[n];
-		if (backward)
-		{
-			for (int i = 0; i < m_sphere->nVertex(); i++)
-			{
-				float v1[3];
-				Vertex *v = (Vertex *)m_sphere->vertex(i);
-				// skip poles
-				float phi_, theta_;
-				Coordinate::cart2sph((float *)v->fv(), &phi_, &theta_);
-				if (fabs(phi - phi_) < eps && fabs(theta - theta_) < eps) continue;
-				SphericalHarmonics::basis(m_degree, (float *)v->fv(), Y);
-				reconsCoord(v->fv(), v1, Y, m_coeff, m_degree, m_pole);
-				MathVector V(v1); V.unit();
-				v->setVertex(V.fv());
-			}
-		}
-		else
-		{
-			for (int i = 0; i < m_sphere_subj->nVertex(); i++)
-			{
-				float v1[3];
-				Vertex *v = (Vertex *)m_sphere_subj->vertex(i);
-				// skip poles
-				float phi_, theta_;
-				Coordinate::cart2sph((float *)v->fv(), &phi_, &theta_);
-				if (fabs(phi - phi_) < eps && fabs(theta - theta_) < eps) continue;
-				SphericalHarmonics::basis(m_degree, (float *)v->fv(), Y);
-				reconsCoord(v->fv(), v1, Y, m_coeff, m_degree, m_pole);
-				MathVector V(v1); V.unit();
-				v->setVertex(V.fv());
-			}
-		}
-		delete [] Y;
 	}
+	else
+	{
+		m_coeff[0] = 0;
+		m_coeff[1] = 0;
+	}
+	float phi, theta;
+	Coordinate::cart2sph(m_pole, &phi, &theta);
+
+	cout << "Initializing deformation..\n";
+	// deform vertex
+	float eps = 0.0f;
+	float *Y = new float[n];
+	if (backward)
+	{
+		for (int i = 0; i < m_sphere->nVertex(); i++)
+		{
+			float v1[3];
+			Vertex *v = (Vertex *)m_sphere->vertex(i);
+			// skip poles
+			float phi_, theta_;
+			Coordinate::cart2sph((float *)v->fv(), &phi_, &theta_);
+			if (fabs(phi - phi_) < eps && fabs(theta - theta_) < eps) continue;
+			SphericalHarmonics::basis(m_degree, (float *)v->fv(), Y);
+			reconsCoord(v->fv(), v1, Y, m_coeff, m_degree, m_pole);
+			MathVector V(v1); V.unit();
+			v->setVertex(V.fv());
+		}
+	}
+	else
+	{
+		for (int i = 0; i < m_sphere_subj->nVertex(); i++)
+		{
+			float v1[3];
+			Vertex *v = (Vertex *)m_sphere_subj->vertex(i);
+			// skip poles
+			float phi_, theta_;
+			Coordinate::cart2sph((float *)v->fv(), &phi_, &theta_);
+			if (fabs(phi - phi_) < eps && fabs(theta - theta_) < eps) continue;
+			SphericalHarmonics::basis(m_degree, (float *)v->fv(), Y);
+			reconsCoord(v->fv(), v1, Y, m_coeff, m_degree, m_pole);
+			MathVector V(v1); V.unit();
+			v->setVertex(V.fv());
+		}
+	}
+	delete [] Y;
 	
 	if (property != vector<string>())
 	{
@@ -163,7 +194,7 @@ SurfaceRemeshing::SurfaceRemeshing(const char *subject, const char *sphere, cons
 	}
 }
 
-void SurfaceRemeshing::reconsCoord(const float *v0, float *v1, float *Y, float *coeff, float degree, float *pole)
+void SurfaceRemeshing::reconsCoord(const float *v0, float *v1, float *Y, float *coeff, int degree, float *pole)
 {
 	// spharm basis
 	int n = (degree + 1) * (degree + 1);
@@ -292,7 +323,7 @@ int SurfaceRemeshing::dataInterpolation(vector<int *> refMap, int index, float *
 	Vertex *c = (Vertex *)f->vertex(2);
 	data = refMap[a->id()][channel] * coeff[0] + refMap[b->id()][channel] * coeff[1] + refMap[c->id()][channel] * coeff[2];
 
-	return data;
+	return (int)data;
 }
 
 float SurfaceRemeshing::dataMedian(float *refMap, int index, Mesh *mesh)
@@ -397,14 +428,14 @@ void SurfaceRemeshing::saveDeformedSurface(const char *filename)
 			name = name.substr(found, name.size() - found);
 			fprintf(fp, "%s 1 %d float\n", name.c_str(), m_sphere->nVertex());
 			for (int j = 0; j < m_sphere->nVertex(); j++)
-				fprintf(fp, "%f\n", m_refMap[i][j]);
+				fprintf(fp, "%f\n", m_deData[i][j]);
 			fprintf(fp, "\n");
 		}
 		fclose(fp);
 	}
 }
 
-void SurfaceRemeshing::saveDeformedProperty(const char *filename)
+void SurfaceRemeshing::saveDeformedProperty(const char *filename, bool header)
 {
 	if (m_property != vector<string>())
 	{
@@ -414,14 +445,17 @@ void SurfaceRemeshing::saveDeformedProperty(const char *filename)
 			unsigned found = name.find_last_of(".") + 1;
 			name = name.substr(found, name.size() - found);
 			char fullname[1024];
-			sprintf(fullname, "%s_%s.txt", filename, name.c_str());
+			sprintf(fullname, "%s.%s.txt", filename, name.c_str());
 			
 			FILE *fp = fopen(fullname, "w");
-			fprintf(fp, "NUMBER_OF_POINTS %d\n", m_sphere->nVertex());
-			fprintf(fp, "DIMENSION=1\n");
-			fprintf(fp, "TYPE=Scalar\n");
+			if (header)
+			{
+				fprintf(fp, "NUMBER_OF_POINTS %d\n", m_sphere->nVertex());
+				fprintf(fp, "DIMENSION=1\n");
+				fprintf(fp, "TYPE=Scalar\n");
+			}
 			for (int j = 0; j < m_sphere->nVertex(); j++)
-				fprintf(fp, "%f\n", m_refMap[i][j]);
+				fprintf(fp, "%f\n", m_deData[i][j]);
 			fclose(fp);
 		}
 	}
@@ -431,3 +465,4 @@ void SurfaceRemeshing::saveDeformedSphere(const char *filename)
 {
 	m_sphere_subj->saveFile(filename, "vtk");
 }
+
