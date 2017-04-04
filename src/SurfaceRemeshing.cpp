@@ -168,7 +168,7 @@ SurfaceRemeshing::SurfaceRemeshing(const char *subject, const char *sphere, cons
 		}
 	}
 	cout << "Tree initialization..\n";
-	m_tree = new AABB(m_sphere_subj);
+	m_tree = new AABB_Sphere(m_sphere_subj);
 
 	if (colormap != NULL)
 	{
@@ -347,7 +347,7 @@ void SurfaceRemeshing::deformSurface()
 	{
 		float coeff[3];
 		Vertex *v = (Vertex *)m_sphere->vertex(i);
-		int id = m_tree->closestFace((float *)v->fv(), coeff, 0.0001);
+		int id = m_tree->closestFace((float *)v->fv(), coeff);
 		float d_v[3];
 		if (m_interpolation)
 		{
@@ -385,7 +385,7 @@ void SurfaceRemeshing::deformData()
 		{
 			float coeff[3];
 			Vertex *v = (Vertex *)m_sphere->vertex(i);
-			int id = m_tree->closestFace((float *)v->fv(), coeff, 0.0001);
+			int id = m_tree->closestFace((float *)v->fv(), coeff);
 			float d;
 			if (m_interpolation)
 			{

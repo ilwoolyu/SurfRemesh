@@ -4,7 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include "Mesh.h"
-#include "AABB.h"
+#include "AABB_Sphere.h"
 
 using namespace std;
 
@@ -31,7 +31,7 @@ private:
 	float m_pole[3];
 	float *m_coeff;
 	float *m_x, *m_y, *m_z;
-	AABB *m_tree;
+	AABB_Sphere *m_tree;
 	bool m_interpolation;
 	bool m_backward;
 	bool m_keepColor;
