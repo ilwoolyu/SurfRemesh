@@ -1,3 +1,15 @@
+/*************************************************
+*	SurfaceRemeshing.cpp
+*
+*	Release: Sep 2016
+*	Update: April 2017
+*
+*	Vanderbilt University
+*	Electrical Engineering and Computer Science
+*	
+*	Ilwoo Lyu, ilwoo.lyu@vanderbilt.edu
+*************************************************/
+
 #pragma once
 
 #include <stdio.h>
