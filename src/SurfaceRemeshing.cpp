@@ -439,7 +439,10 @@ void SurfaceRemeshing::saveDeformedSurface(const char *filename)
 		for (int i = 0; i < m_refMap.size(); i++)
 		{
 			string name = m_property[i].substr(0, m_property[i].size() - 4);
-			unsigned found = name.find_last_of(".") + 1;
+			unsigned found1 = name.find_last_of(".") + 1;
+			unsigned found2 = name.find_last_of("_") + 1;
+			unsigned found = (found1 > found2)? found1: found2;
+			
 			name = name.substr(found, name.size() - found);
 			fprintf(fp, "%s 1 %d float\n", name.c_str(), m_sphere->nVertex());
 			for (int j = 0; j < m_sphere->nVertex(); j++)
