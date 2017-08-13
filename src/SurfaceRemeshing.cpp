@@ -25,7 +25,7 @@ SurfaceRemeshing::~SurfaceRemeshing(void)
 	delete [] m_z;
 }
 
-SurfaceRemeshing::SurfaceRemeshing(const char *subject, const char *sphere, const char *dfield, bool keepColor, const char *sphere_t, const char *colormap, vector<string> property, bool interpolation, bool backward)
+SurfaceRemeshing::SurfaceRemeshing(const char *subject, const char *sphere, const char *dfield, bool keepColor, const char *sphere_t, const char *colormap, vector<string> property, bool noheader, bool interpolation, bool backward)
 {
 	m_keepColor = keepColor;
 	cout << "loading subject surface model..\n";
@@ -166,9 +166,12 @@ SurfaceRemeshing::SurfaceRemeshing(const char *subject, const char *sphere, cons
 			cout << "\t" << property[i].c_str() << endl;
 			fp = fopen(property[i].c_str(), "r");
 			char line[1024];
-			fgets(line, sizeof(line), fp);
-			fgets(line, sizeof(line), fp);
-			fgets(line, sizeof(line), fp);
+			if (!noheader)
+			{
+				fgets(line, sizeof(line), fp);
+				fgets(line, sizeof(line), fp);
+				fgets(line, sizeof(line), fp);
+			}
 		
 			float *refMap = new float[nProp];
 			for (int j = 0; j < nProp; j++)
@@ -454,7 +457,10 @@ void SurfaceRemeshing::saveDeformedProperty(const char *filename, bool header)
 		for (int i = 0; i < m_refMap.size(); i++)
 		{
 			string name = m_property[i].substr(0, m_property[i].size() - 4);
-			unsigned found = name.find_last_of(".") + 1;
+			unsigned found1 = name.find_last_of(".") + 1;
+			unsigned found2 = name.find_last_of("_") + 1;
+			unsigned found = (found1 > found2)? found1: found2;
+			
 			name = name.substr(found, name.size() - found);
 			char fullname[1024];
 			sprintf(fullname, "%s.%s.txt", filename, name.c_str());

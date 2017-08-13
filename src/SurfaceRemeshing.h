@@ -25,7 +25,7 @@ class SurfaceRemeshing
 public:
 	SurfaceRemeshing(void);
 	~SurfaceRemeshing(void);
-	SurfaceRemeshing(const char *subject, const char *sphere, const char *dfield, bool keepColor, const char *sphere_t = NULL, const char *colormap = NULL, vector<string> property = vector<string>(), bool interpolation = true, bool backward = false);
+	SurfaceRemeshing(const char *subject, const char *sphere, const char *dfield, bool keepColor, const char *sphere_t = NULL, const char *colormap = NULL, vector<string> property = vector<string>(), bool noheader = false, bool interpolation = true, bool backward = false);
 	void saveDeformedSurface(const char *filename);
 	void saveDeformedSphere(const char *filename);
 	void saveDeformedProperty(const char *filename, bool header = true);
