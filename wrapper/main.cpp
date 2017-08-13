@@ -13,10 +13,11 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 	
-	char *subject = (char *) input.c_str();
 	char *dfield = NULL;
 	if (!coeff.empty()) dfield = (char *) coeff.c_str();
 	char *sphere = (char *) temp.c_str();
+	char *subject = sphere;
+	if (!input.empty()) subject = (char *) input.c_str();
 	char *reference = NULL;
 	if (!ref.empty()) reference = (char *) ref.c_str();
 	char *dsphere = NULL;
@@ -36,7 +37,7 @@ int main(int argc, char* argv[])
 	if (!coeff.empty())  cout << "deformation: " << dfield << endl;
 	cout << "reference: " << reference << endl;
 	
-	SR = new SurfaceRemeshing(subject, sphere, dfield, keepC, reference, colormap, property);
+	SR = new SurfaceRemeshing(subject, sphere, dfield, keepC, reference, colormap, property, noheader);
 
 	cout << "Write output surface model..\n";
 	if (!output.empty()) SR->saveDeformedSurface(output.c_str());
