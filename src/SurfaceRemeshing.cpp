@@ -50,7 +50,7 @@ SurfaceRemeshing::SurfaceRemeshing(const char *subject, const char *sphere, cons
 	cout << "Loading unit sphere information..\n";
 	m_sphere_subj = new Mesh();
 	m_sphere_subj->openFile(sphere);
-	m_sphere_subj->centering();
+	//m_sphere_subj->centering();
 	
 	for (int i = 0; i < nv; i++)
 	{
@@ -64,7 +64,7 @@ SurfaceRemeshing::SurfaceRemeshing(const char *subject, const char *sphere, cons
 	if (sphere_t == NULL) sphere_t = sphere;
 	m_sphere = new Mesh();
 	m_sphere->openFile(sphere_t);
-	m_sphere->centering();
+	//m_sphere->centering();
 	for (int i = 0; i < m_sphere->nVertex(); i++)
 	{
 		Vertex *v = (Vertex *)m_sphere->vertex(i);
