@@ -1,23 +1,40 @@
+cmake_minimum_required(VERSION 3.5)
+
 project(SurfRemesh)
-cmake_minimum_required(VERSION 2.8)
 
-find_package(SlicerExecutionModel REQUIRED)
+#-----------------------------------------------------------------------------
+set(MODULE_NAME SRemesh)
 
-include_directories(Mesh)
-include_directories( ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} )
-include(${SlicerExecutionModel_USE_FILE})
-include(${GenerateCLP_USE_FILE})
-
-generateCLP(SRemeshCLP wrapper/SRemesh.xml)
-
-set (Remesh_SOURCES src/SurfaceRemeshing.cpp)
-
-# MESH library
+#-----------------------------------------------------------------------------
+# MeshLib
 find_package(MeshLib REQUIRED)
-include_directories(${Mesh_INCLUDE_DIRS} ${Mesh_INCLUDE_DIRS}/Util)
-link_directories(${Mesh_LIBRARY_DIRS})
 
-include_directories(src)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY /home-nfs/masi-shared-home/home/local/VANDERBILT/lyui/bin)
-add_executable(SurfRemesh ${Remesh_SOURCES} wrapper/main.cpp ${SRemeshCLP})
-target_link_libraries(SurfRemesh Mesh)
+# SlicerExecutionModel
+find_package(SlicerExecutionModel REQUIRED)
+include(${SlicerExecutionModel_USE_FILE})
+
+#-----------------------------------------------------------------------------
+set(MODULE_INCLUDE_DIRECTORIES
+  )
+
+set(MODULE_SRCS
+  SurfaceRemeshing.cpp
+  )
+
+set(MODULE_TARGET_LIBRARIES
+  Mesh
+  )
+
+#-----------------------------------------------------------------------------
+SEMMacroBuildCLI(
+  NAME ${MODULE_NAME}
+  TARGET_LIBRARIES ${MODULE_TARGET_LIBRARIES}
+  INCLUDE_DIRECTORIES ${MODULE_INCLUDE_DIRECTORIES}
+  ADDITIONAL_SRCS ${MODULE_SRCS}
+  EXECUTABLE_ONLY
+  )
+
+#-----------------------------------------------------------------------------
+if(BUILD_TESTING)
+#  add_subdirectory(Testing)
+endif()

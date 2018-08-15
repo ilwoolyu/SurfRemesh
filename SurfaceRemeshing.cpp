@@ -435,7 +435,7 @@ void SurfaceRemeshing::saveDeformedSurface(const char *filename)
 	{
 		FILE *fp = fopen(filename, "a");
 		if (m_color.size() != m_sphere->nVertex()) fprintf(fp, "POINT_DATA %d\n", m_sphere->nVertex());
-		fprintf(fp, "FIELD ScalarData %d\n", m_refMap.size());
+		fprintf(fp, "FIELD ScalarData %d\n", static_cast<int>(m_refMap.size()));
 		for (int i = 0; i < m_refMap.size(); i++)
 		{
 			string name = m_property[i].substr(0, m_property[i].size() - 4);
